@@ -1,4 +1,5 @@
-# P1-Cabral-Federico-Proyecto-Informatico
+
+Trabajo Practico N°2: Lectura análoga y Monitor Serial
 Colocar:
 1 pulsador
 3 potenciómetros 

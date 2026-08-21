@@ -71,9 +71,6 @@ void setup()
   pinMode(Buzzer,INPUT);
   pinMode(Bombilla,OUTPUT);
   pinMode(A4,INPUT);	
-
-  
-  
 }
 
 void loop()
@@ -127,8 +124,4 @@ void VerificarMovimiento()
     playMidi(Buzzer, midi2, ARRAY_LEN(midi1));
     CerrarPuertas();
   }
-  if (ValorMovimiento1 == LOW && ValorMovimiento2 == LOW)
-    {
-    CerrarPuertas();
-  	}
 }

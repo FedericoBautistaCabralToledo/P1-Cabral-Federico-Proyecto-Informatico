@@ -1,4 +1,3 @@
-
 //Musica1
 #define ARRAY_LEN(array) (sizeof(array) / sizeof(array[0]))
 #define Fb5 740
@@ -15,6 +14,7 @@
 #define G4 392
 
 //Componentes
+#include <Adafruit_LiquidCrystal.h>
 #include <Servo.h>
 #define Movimiento1 2
 #define Movimiento2 3
@@ -31,6 +31,8 @@ int ValorLuz;
 int ValorLuzREAL;
 bool ValorMovimiento1;
 bool ValorMovimiento2;
+bool PuertasAbiertas = LOW;
+Adafruit_LiquidCrystal lcd1(32); 
 
 const int midi1[5][3] =
 {
@@ -60,44 +62,42 @@ void playMidi(int pin, const int notes[][3], size_t len){
 
 void setup()
 {
-  Serial.begin(9600);
+  lcd1.begin(16, 2);
+  lcd1.setBacklight(1);
   Puerta1.attach(A0);
-  Puerta1.write(0);
-  Puerta2.attach(A1);
-  Puerta2.write(0);
+  Puerta1.write(90);
   
-  pinMode(ValorMovimiento1,INPUT);
-  pinMode(ValorMovimiento2,INPUT);
-  pinMode(Buzzer,INPUT);
+  Puerta2.attach(A1);
+  Puerta2.write(90);
+  
+  pinMode(Movimiento1,INPUT);
+  pinMode(Movimiento2,INPUT);
+  pinMode(Buzzer,OUTPUT);
   pinMode(Bombilla,OUTPUT);
-  pinMode(A4,INPUT);	
+  pinMode(SensorLuz,INPUT);	
 }
 
 void loop()
 {
   ValorLuz = analogRead(SensorLuz);
   
- ValorMovimiento1 = digitalRead(Movimiento1);
- ValorMovimiento2 = digitalRead(Movimiento2);
-  
  VerificarMovimiento();
- VerificarLuz();  
+ VerificarLuz();
+  LCDMostrar();
 }
 
-void AbrirPuertas(bool ValorMovimiento1)
+void AbrirPuertas()
 {
-  playMidi(Buzzer, midi1, ARRAY_LEN(midi1));
-  Puerta1.write(220);
-  Puerta2.write(220);
+  Puerta1.write(180);
+  Puerta2.write(180);
+  delay(500);
 }
 
 void CerrarPuertas()
 {
-  if (ValorPuerta1 > 0 && ValorPuerta2 > 0)
-  {
-   Puerta1.write(90);
-   Puerta2.write(90);
-  }
+  Puerta1.write(90);
+  Puerta2.write(90);
+  delay(500);
 }
 
 void VerificarLuz()
@@ -115,13 +115,45 @@ void VerificarLuz()
 
 void VerificarMovimiento()
 {
-  if (ValorMovimiento1 == HIGH)
-    {
-    AbrirPuertas(ValorMovimiento1);
-  	}
-  if (ValorMovimiento2 == HIGH)
+   ValorMovimiento1 = digitalRead(Movimiento1);
+ ValorMovimiento2 = digitalRead(Movimiento2);
+  
+  if (ValorMovimiento1 == HIGH && PuertasAbiertas == LOW)
   {
-    playMidi(Buzzer, midi2, ARRAY_LEN(midi1));
-    CerrarPuertas();
+   AbrirPuertas();
+   PuertasAbiertas = HIGH;
+   playMidi(Buzzer, midi1, ARRAY_LEN(midi1));
+  }
+  else if (ValorMovimiento1 == HIGH && PuertasAbiertas == HIGH)
+  {
+   CerrarPuertas();
+   PuertasAbiertas = LOW;
+   playMidi(Buzzer, midi2, ARRAY_LEN(midi1));
+  }
+  delay(2000);
+  if (ValorMovimiento2 == HIGH && PuertasAbiertas == LOW)
+  {
+   AbrirPuertas();
+   PuertasAbiertas = HIGH;
+   playMidi(Buzzer, midi1, ARRAY_LEN(midi1));
+  }
+  else if (ValorMovimiento2 == HIGH && PuertasAbiertas == HIGH)
+  {
+   CerrarPuertas(); 
+   PuertasAbiertas = LOW;
+   playMidi(Buzzer, midi2, ARRAY_LEN(midi1));
+  }
+}
+
+void LCDMostrar()
+{
+  lcd1.setCursor(0, 0);
+ if (PuertasAbiertas == HIGH)
+ {
+   lcd1.print("Abierta");
+ }
+  else if (PuertasAbiertas == LOW)
+  {
+   lcd1.print("Cerrada"); 
   }
 }
